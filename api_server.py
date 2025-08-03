@@ -1,40 +1,28 @@
 #!/usr/bin/env python3
 """
-API сервер для Telegram Mini App (Продакшен версия)
+API сервер для Telegram Mini App
+Обрабатывает запросы от веб-приложения и работает с базой данных бота
 """
 
 import json
 import sqlite3
-import os
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import sys
+import os
 
-# Добавляем путь к модулям
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Добавляем путь к родительской папке для импорта модулей бота
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-try:
-    from database import Database
-    from pet_manager import PetManager
-    from config import PET_TYPES, ACTIONS
-except ImportError:
-    print("⚠️ Модули не найдены, используем демо-режим")
-    # Демо-версия без зависимостей
-    PET_TYPES = {"cat": {"emoji": "🐱", "name": "Котик"}}
-    ACTIONS = {"feed": {"name": "Покормить"}}
+from database import Database
+from pet_manager import PetManager
+from config import PET_TYPES, ACTIONS
 
 class MiniAppAPIHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        # Инициализируем базу данных при создании обработчика
-        try:
-            self.db = Database('pets.db')
-            self.pm = PetManager(self.db)
-            print("✅ База данных инициализирована")
-        except Exception as e:
-            print(f"⚠️ Ошибка инициализации БД: {e}")
-            self.db = None
-            self.pm = None
+        self.db = Database('pets.db')
+        self.pm = PetManager(self.db)
         super().__init__(*args, **kwargs)
     
     def do_OPTIONS(self):
@@ -59,14 +47,14 @@ class MiniAppAPIHandler(BaseHTTPRequestHandler):
         query_params = parse_qs(parsed_url.query)
         
         try:
-            if path == '/api/health':
-                self.handle_health()
-            elif path == '/api/user':
+            if path == '/api/user':
                 self.handle_get_user(query_params)
             elif path == '/api/couple':
                 self.handle_get_couple(query_params)
             elif path == '/api/pet':
                 self.handle_get_pet(query_params)
+            elif path == '/api/stats':
+                self.handle_get_stats(query_params)
             else:
                 self.send_error(404, "Not Found")
         except Exception as e:
@@ -78,12 +66,9 @@ class MiniAppAPIHandler(BaseHTTPRequestHandler):
         path = parsed_url.path
         
         try:
-            content_length = int(self.headers.get('Content-Length', 0))
-            if content_length > 0:
-                post_data = self.rfile.read(content_length)
-                data = json.loads(post_data.decode('utf-8'))
-            else:
-                data = {}
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
             
             if path == '/api/couple/create':
                 self.handle_create_couple(data)
@@ -96,19 +81,6 @@ class MiniAppAPIHandler(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_error(500, str(e))
     
-    def handle_health(self):
-        """Проверка здоровья сервера"""
-        response = {
-            'status': 'ok',
-            'timestamp': datetime.now().isoformat(),
-            'version': '1.0.0'
-        }
-        
-        self.send_response(200)
-        self.send_cors_headers()
-        self.end_headers()
-        self.wfile.write(json.dumps(response).encode())
-    
     def handle_get_user(self, params):
         """Получение информации о пользователе"""
         user_id = int(params.get('user_id', [0])[0])
@@ -117,23 +89,95 @@ class MiniAppAPIHandler(BaseHTTPRequestHandler):
             self.send_error(400, "user_id required")
             return
         
-        if not self.db:
-            # Демо-режим
-            response = {
-                'user_id': user_id,
-                'has_couple': False,
-                'couple_id': None,
-                'demo_mode': True
-            }
-        else:
-            # Реальный режим
-            couple = self.db.get_user_couple(user_id)
-            response = {
-                'user_id': user_id,
-                'has_couple': couple is not None,
-                'couple_id': couple['id'] if couple else None,
-                'demo_mode': False
-            }
+        # Проверяем, есть ли пользователь в базе
+        couple = self.db.get_user_couple(user_id)
+        
+        response = {
+            'user_id': user_id,
+            'has_couple': couple is not None,
+            'couple_id': couple['id'] if couple else None
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
+    def handle_get_couple(self, params):
+        """Получение информации о паре"""
+        user_id = int(params.get('user_id', [0])[0])
+        
+        if user_id == 0:
+            self.send_error(400, "user_id required")
+            return
+        
+        couple = self.db.get_user_couple(user_id)
+        
+        if not couple:
+            self.send_error(404, "Couple not found")
+            return
+        
+        response = {
+            'id': couple['id'],
+            'user1_id': couple['user1_id'],
+            'user2_id': couple['user2_id'],
+            'user1_name': couple['user1_name'],
+            'user2_name': couple['user2_name'],
+            'created_at': couple['created_at']
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
+    def handle_get_pet(self, params):
+        """Получение информации о питомце"""
+        couple_id = int(params.get('couple_id', [0])[0])
+        
+        if couple_id == 0:
+            self.send_error(400, "couple_id required")
+            return
+        
+        pet = self.db.get_couple_pet(couple_id)
+        
+        if not pet:
+            self.send_error(404, "Pet not found")
+            return
+        
+        # Обновляем статистику питомца
+        updated_pet = self.pm._update_pet_stats_over_time(pet)
+        
+        response = {
+            'id': updated_pet['id'],
+            'name': updated_pet['name'],
+            'type': updated_pet['pet_type'],
+            'hunger': updated_pet['hunger'],
+            'happiness': updated_pet['happiness'],
+            'energy': updated_pet['energy'],
+            'level': updated_pet['level'],
+            'experience': updated_pet['experience'],
+            'last_updated': updated_pet['last_updated']
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
+    def handle_get_stats(self, params):
+        """Получение статистики"""
+        couple_id = int(params.get('couple_id', [0])[0])
+        
+        if couple_id == 0:
+            self.send_error(400, "couple_id required")
+            return
+        
+        actions = self.db.get_couple_actions(couple_id, limit=10)
+        
+        response = {
+            'actions': actions
+        }
         
         self.send_response(200)
         self.send_cors_headers()
@@ -152,24 +196,13 @@ class MiniAppAPIHandler(BaseHTTPRequestHandler):
             return
         
         try:
-            if not self.db:
-                # Демо-режим
-                couple_id = int(f"{user1_id}{user2_id}")
-                response = {
-                    'success': True,
-                    'couple_id': couple_id,
-                    'message': 'Пара создана успешно! (Демо-режим)',
-                    'demo_mode': True
-                }
-            else:
-                # Реальный режим
-                couple_id = self.db.create_couple(user1_id, user2_id, user1_name, user2_name)
-                response = {
-                    'success': True,
-                    'couple_id': couple_id,
-                    'message': 'Пара создана успешно!',
-                    'demo_mode': False
-                }
+            couple_id = self.db.create_couple(user1_id, user2_id, user1_name, user2_name)
+            
+            response = {
+                'success': True,
+                'couple_id': couple_id,
+                'message': 'Пара создана успешно!'
+            }
             
             self.send_response(200)
             self.send_cors_headers()
@@ -179,8 +212,94 @@ class MiniAppAPIHandler(BaseHTTPRequestHandler):
         except Exception as e:
             response = {
                 'success': False,
-                'error': str(e),
-                'demo_mode': self.db is None
+                'error': str(e)
+            }
+            
+            self.send_response(400)
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode())
+    
+    def handle_create_pet(self, data):
+        """Создание питомца"""
+        couple_id = data.get('couple_id')
+        pet_type = data.get('pet_type')
+        name = data.get('name', 'Питомец')
+        
+        if not couple_id or not pet_type:
+            self.send_error(400, "couple_id and pet_type required")
+            return
+        
+        try:
+            pet_id = self.db.create_pet(couple_id, pet_type, name)
+            
+            response = {
+                'success': True,
+                'pet_id': pet_id,
+                'message': 'Питомец создан успешно!'
+            }
+            
+            self.send_response(200)
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode())
+            
+        except Exception as e:
+            response = {
+                'success': False,
+                'error': str(e)
+            }
+            
+            self.send_response(400)
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode())
+    
+    def handle_pet_action(self, data):
+        """Выполнение действия с питомцем"""
+        couple_id = data.get('couple_id')
+        action_type = data.get('action_type')
+        user_id = data.get('user_id')
+        
+        if not couple_id or not action_type or not user_id:
+            self.send_error(400, "couple_id, action_type and user_id required")
+            return
+        
+        try:
+            # Получаем питомца
+            pet = self.db.get_couple_pet(couple_id)
+            if not pet:
+                self.send_error(404, "Pet not found")
+                return
+            
+            # Выполняем действие
+            updated_pet = self.pm.perform_action(couple_id, action_type, user_id)
+            
+            response = {
+                'success': True,
+                'pet': {
+                    'id': updated_pet['id'],
+                    'name': updated_pet['name'],
+                    'type': updated_pet['pet_type'],
+                    'hunger': updated_pet['hunger'],
+                    'happiness': updated_pet['happiness'],
+                    'energy': updated_pet['energy'],
+                    'level': updated_pet['level'],
+                    'experience': updated_pet['experience']
+                },
+                'action': action_type,
+                'message': f'Действие "{ACTIONS[action_type]["name"]}" выполнено!'
+            }
+            
+            self.send_response(200)
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode())
+            
+        except Exception as e:
+            response = {
+                'success': False,
+                'error': str(e)
             }
             
             self.send_response(400)
@@ -188,23 +307,13 @@ class MiniAppAPIHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(response).encode())
 
-def run_api_server(port=None):
+def run_api_server(port=8000):
     """Запуск API сервера"""
-    if port is None:
-        port = int(os.environ.get('PORT', 8000))
-    
-    print(f"🚀 Запуск API сервера на порту {port}")
-    print(f"📡 Переменные окружения: PORT={os.environ.get('PORT', 'не задан')}")
-    
-    try:
-        server_address = ('0.0.0.0', port)
-        httpd = HTTPServer(server_address, MiniAppAPIHandler)
-        print(f"✅ API сервер запущен на {server_address}")
-        print(f"🔗 Health check: http://0.0.0.0:{port}/api/health")
-        httpd.serve_forever()
-    except Exception as e:
-        print(f"❌ Ошибка запуска сервера: {e}")
-        raise
+    server_address = ('', port)
+    httpd = HTTPServer(server_address, MiniAppAPIHandler)
+    print(f"🌐 API сервер запущен на порту {port}")
+    print(f"📡 URL: http://localhost:{port}")
+    httpd.serve_forever()
 
 if __name__ == '__main__':
-    run_api_server()
+    run_api_server() 

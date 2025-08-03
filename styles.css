@@ -1,0 +1,550 @@
+/* Основные стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Экраны */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+
+.screen.active {
+    transform: translateX(0);
+}
+
+/* Заголовки */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-top: 20px;
+}
+
+.header h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.header h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.header p {
+    color: #666;
+    font-size: 14px;
+}
+
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #667eea;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* Кнопки */
+.btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn.secondary {
+    background: #f8f9fa;
+    color: #333;
+    border: 2px solid #e9ecef;
+}
+
+.btn.secondary:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+}
+
+/* Карточка питомца */
+.pet-card {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.pet-avatar {
+    font-size: 48px;
+    margin-right: 15px;
+}
+
+.pet-details h3 {
+    font-size: 18px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.pet-details p {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Статистика */
+.stats-grid {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+}
+
+.stat-icon {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.stat-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin: 8px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+#hunger-value, #happiness-value, #energy-value {
+    font-size: 12px;
+    color: #666;
+    float: right;
+}
+
+.level-info {
+    background: #e3f2fd;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #1976d2;
+}
+
+.level-info span {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Форма создания пары */
+.couple-form {
+    background: #f8f9fa;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.info-box {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.info-box p {
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: #856404;
+}
+
+.info-box ol {
+    padding-left: 20px;
+    color: #856404;
+}
+
+.info-box li {
+    margin-bottom: 5px;
+}
+
+/* Действия */
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.action-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.action-emoji {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.action-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.action-result {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    animation: slideIn 0.3s ease;
+}
+
+.action-result.hidden {
+    display: none;
+}
+
+.result-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#result-emoji {
+    font-size: 24px;
+}
+
+#result-text {
+    font-weight: 500;
+    color: #155724;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Статистика */
+.stats-container {
+    display: grid;
+    gap: 20px;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.stat-card h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.actions-list {
+    font-size: 14px;
+    color: #666;
+}
+
+.actions-list p {
+    text-align: center;
+    font-style: italic;
+}
+
+/* Помощь */
+.help-content {
+    background: #f8f9fa;
+    border-radius: 20px;
+    padding: 20px;
+}
+
+.help-section {
+    margin-bottom: 25px;
+}
+
+.help-section h3 {
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 16px;
+}
+
+.help-section ol, .help-section ul {
+    padding-left: 20px;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.help-section li {
+    margin-bottom: 5px;
+}
+
+.help-section strong {
+    color: #333;
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+    }
+    
+    .header {
+        padding-top: 10px;
+    }
+    
+    .back-btn {
+        top: 15px;
+        left: 15px;
+    }
+    
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.screen.active {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Скрытые элементы */
+.hidden {
+    display: none !important;
+}
+
+/* Модальное окно приветствия */
+.welcome-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.welcome-modal.show {
+    opacity: 1;
+}
+
+.welcome-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 0;
+    max-width: 90%;
+    width: 400px;
+    max-height: 80%;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.welcome-modal.show .welcome-content {
+    transform: scale(1);
+}
+
+.welcome-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.welcome-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.welcome-body {
+    padding: 30px;
+    color: white;
+    line-height: 1.6;
+    font-size: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.welcome-body p {
+    margin: 0;
+}
+
+.welcome-footer {
+    padding: 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.welcome-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.welcome-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.welcome-btn:active {
+    transform: translateY(0);
+} 

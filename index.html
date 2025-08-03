@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐾 Тамагочи для Пар</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Главное меню -->
+        <div id="main-menu" class="screen active">
+            <div class="header">
+                <h1>🐾 Тамагочи для Пар</h1>
+                <p>Выращивайте питомца вместе с любимым человеком!</p>
+            </div>
+            
+            <div class="menu-buttons">
+                <button class="btn primary" onclick="showScreen('pet-status')">
+                    🐾 Мой питомец
+                </button>
+                <button class="btn secondary" onclick="showScreen('create-couple')">
+                    💕 Создать пару
+                </button>
+                <button class="btn secondary" onclick="showScreen('pet-actions')">
+                    🎮 Действия с питомцем
+                </button>
+                <button class="btn secondary" onclick="showScreen('statistics')">
+                    📊 Статистика
+                </button>
+                <button class="btn secondary" onclick="showScreen('help')">
+                    ℹ️ Помощь
+                </button>
+            </div>
+        </div>
+
+        <!-- Статус питомца -->
+        <div id="pet-status" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('main-menu')">← Назад</button>
+                <h2>🐾 Мой питомец</h2>
+            </div>
+            
+            <div id="pet-info" class="pet-card">
+                <div class="pet-avatar">
+                    <span id="pet-emoji">🐱</span>
+                </div>
+                <div class="pet-details">
+                    <h3 id="pet-name">Загрузка...</h3>
+                    <p id="pet-description">Загрузка...</p>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-icon">🍽️</span>
+                    <span class="stat-label">Голод</span>
+                    <div class="progress-bar">
+                        <div id="hunger-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="hunger-value">0/100</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-icon">😊</span>
+                    <span class="stat-label">Счастье</span>
+                    <div class="progress-bar">
+                        <div id="happiness-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="happiness-value">0/100</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-icon">⚡</span>
+                    <span class="stat-label">Энергия</span>
+                    <div class="progress-bar">
+                        <div id="energy-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span id="energy-value">0/100</span>
+                </div>
+            </div>
+            
+            <div class="level-info">
+                <span>📈 Уровень: <span id="pet-level">1</span></span>
+                <span>Опыт: <span id="pet-exp">0</span>/<span id="pet-exp-max">100</span></span>
+            </div>
+        </div>
+
+        <!-- Создание пары -->
+        <div id="create-couple" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('main-menu')">← Назад</button>
+                <h2>💕 Создать пару</h2>
+            </div>
+            
+            <div class="couple-form">
+                <div class="form-group">
+                    <label>Ваш ID: <span id="my-id">Загрузка...</span></label>
+                    <button class="btn secondary" onclick="copyMyId()">📋 Скопировать</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="partner-id">ID партнера:</label>
+                    <input type="number" id="partner-id" placeholder="Введите ID партнера">
+                </div>
+                
+                <button class="btn primary" onclick="createCouple()">💕 Создать пару</button>
+                
+                <div class="info-box">
+                    <p>💡 Как получить ID партнера:</p>
+                    <ol>
+                        <li>Попросите партнера открыть это приложение</li>
+                        <li>Он увидит свой ID в этом же разделе</li>
+                        <li>Попросите его скопировать и отправить вам</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Действия с питомцем -->
+        <div id="pet-actions" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('main-menu')">← Назад</button>
+                <h2>🎮 Действия с питомцем</h2>
+            </div>
+            
+            <div class="actions-grid">
+                <button class="action-btn" onclick="performAction('feed')">
+                    <span class="action-emoji">🍽️</span>
+                    <span class="action-name">Покормить</span>
+                </button>
+                
+                <button class="action-btn" onclick="performAction('play')">
+                    <span class="action-emoji">🎾</span>
+                    <span class="action-name">Поиграть</span>
+                </button>
+                
+                <button class="action-btn" onclick="performAction('sleep')">
+                    <span class="action-emoji">😴</span>
+                    <span class="action-name">Уложить спать</span>
+                </button>
+                
+                <button class="action-btn" onclick="performAction('pet')">
+                    <span class="action-emoji">🤗</span>
+                    <span class="action-name">Погладить</span>
+                </button>
+            </div>
+            
+            <div id="action-result" class="action-result hidden">
+                <div class="result-content">
+                    <span id="result-emoji">🎉</span>
+                    <p id="result-text">Действие выполнено!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div id="statistics" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('main-menu')">← Назад</button>
+                <h2>📊 Статистика</h2>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>📈 Прогресс</h3>
+                    <div class="stat-row">
+                        <span>Уровень:</span>
+                        <span id="stat-level">1</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Опыт:</span>
+                        <span id="stat-exp">0/100</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>📅 Последние действия</h3>
+                    <div id="recent-actions" class="actions-list">
+                        <p>Пока нет действий</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Помощь -->
+        <div id="help" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="showScreen('main-menu')">← Назад</button>
+                <h2>ℹ️ Помощь</h2>
+            </div>
+            
+            <div class="help-content">
+                <div class="help-section">
+                    <h3>🎮 Как играть</h3>
+                    <ol>
+                        <li>Создайте пару с любимым человеком</li>
+                        <li>Выберите или создайте питомца</li>
+                        <li>Заботьтесь о нем вместе!</li>
+                    </ol>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎯 Действия с питомцем</h3>
+                    <ul>
+                        <li>🍽️ <strong>Покормить</strong> - увеличивает голод</li>
+                        <li>🎾 <strong>Поиграть</strong> - увеличивает счастье, тратит энергию</li>
+                        <li>😴 <strong>Уложить спать</strong> - восстанавливает энергию</li>
+                        <li>🤗 <strong>Погладить</strong> - увеличивает счастье</li>
+                    </ul>
+                </div>
+                
+                <div class="help-section">
+                    <h3>📊 Показатели питомца</h3>
+                    <ul>
+                        <li><strong>Голод</strong> (0-100) - уменьшается со временем</li>
+                        <li><strong>Счастье</strong> (0-100) - уменьшается со временем</li>
+                        <li><strong>Энергия</strong> (0-100) - тратится на игры</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="welcome.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
