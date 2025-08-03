@@ -26,10 +26,13 @@ except ImportError:
 
 class MiniAppAPIHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
+        # Инициализируем базу данных при создании обработчика
         try:
             self.db = Database('pets.db')
             self.pm = PetManager(self.db)
-        except:
+            print("✅ База данных инициализирована")
+        except Exception as e:
+            print(f"⚠️ Ошибка инициализации БД: {e}")
             self.db = None
             self.pm = None
         super().__init__(*args, **kwargs)
@@ -190,12 +193,18 @@ def run_api_server(port=None):
     if port is None:
         port = int(os.environ.get('PORT', 8000))
     
-    server_address = ('', port)
-    httpd = HTTPServer(server_address, MiniAppAPIHandler)
-    print(f"🌐 API сервер запущен на порту {port}")
-    print(f"📡 URL: http://localhost:{port}")
-    print(f"🔗 Health check: http://localhost:{port}/api/health")
-    httpd.serve_forever()
+    print(f"🚀 Запуск API сервера на порту {port}")
+    print(f"📡 Переменные окружения: PORT={os.environ.get('PORT', 'не задан')}")
+    
+    try:
+        server_address = ('0.0.0.0', port)
+        httpd = HTTPServer(server_address, MiniAppAPIHandler)
+        print(f"✅ API сервер запущен на {server_address}")
+        print(f"🔗 Health check: http://0.0.0.0:{port}/api/health")
+        httpd.serve_forever()
+    except Exception as e:
+        print(f"❌ Ошибка запуска сервера: {e}")
+        raise
 
 if __name__ == '__main__':
     run_api_server()

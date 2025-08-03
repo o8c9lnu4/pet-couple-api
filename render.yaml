@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: pet-couple-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python simple_api.py
+    envVars:
+      - key: PORT
+        value: 8000 
