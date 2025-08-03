@@ -29,21 +29,34 @@ class SimpleAPIHandler(BaseHTTPRequestHandler):
         """Обработка GET запросов"""
         parsed_url = urlparse(self.path)
         path = parsed_url.path
+        query_params = parse_qs(parsed_url.query)
+        
+        print(f"📥 GET запрос: {path}")
         
         try:
             if path == '/api/health':
                 self.handle_health()
             elif path == '/':
                 self.handle_root()
+            elif path == '/api/user':
+                self.handle_get_user(query_params)
+            elif path == '/api/couple':
+                self.handle_get_couple(query_params)
+            elif path == '/api/pet':
+                self.handle_get_pet(query_params)
             else:
-                self.send_error(404, "Not Found")
+                print(f"❌ Маршрут не найден: {path}")
+                self.send_error(404, f"Route not found: {path}")
         except Exception as e:
+            print(f"❌ Ошибка обработки GET: {e}")
             self.send_error(500, str(e))
     
     def do_POST(self):
         """Обработка POST запросов"""
         parsed_url = urlparse(self.path)
         path = parsed_url.path
+        
+        print(f"📥 POST запрос: {path}")
         
         try:
             content_length = int(self.headers.get('Content-Length', 0))
@@ -55,9 +68,15 @@ class SimpleAPIHandler(BaseHTTPRequestHandler):
             
             if path == '/api/couple/create':
                 self.handle_create_couple(data)
+            elif path == '/api/pet/create':
+                self.handle_create_pet(data)
+            elif path == '/api/pet/action':
+                self.handle_pet_action(data)
             else:
-                self.send_error(404, "Not Found")
+                print(f"❌ POST маршрут не найден: {path}")
+                self.send_error(404, f"POST route not found: {path}")
         except Exception as e:
+            print(f"❌ Ошибка обработки POST: {e}")
             self.send_error(500, str(e))
     
     def handle_root(self):
@@ -88,6 +107,64 @@ class SimpleAPIHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(response).encode())
     
+    def handle_get_user(self, params):
+        """Получение информации о пользователе (демо-режим)"""
+        user_id = int(params.get('user_id', [0])[0])
+        
+        if user_id == 0:
+            self.send_error(400, "user_id required")
+            return
+        
+        response = {
+            'user_id': user_id,
+            'has_couple': False,
+            'couple_id': None,
+            'demo_mode': True
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
+    def handle_get_couple(self, params):
+        """Получение информации о паре (демо-режим)"""
+        user_id = int(params.get('user_id', [0])[0])
+        
+        if user_id == 0:
+            self.send_error(400, "user_id required")
+            return
+        
+        response = {
+            'user_id': user_id,
+            'couple': None,
+            'demo_mode': True
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
+    def handle_get_pet(self, params):
+        """Получение информации о питомце (демо-режим)"""
+        couple_id = int(params.get('couple_id', [0])[0])
+        
+        if couple_id == 0:
+            self.send_error(400, "couple_id required")
+            return
+        
+        response = {
+            'couple_id': couple_id,
+            'pet': None,
+            'demo_mode': True
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
     def handle_create_couple(self, data):
         """Создание пары (демо-режим)"""
         user1_id = data.get('user1_id')
@@ -103,6 +180,65 @@ class SimpleAPIHandler(BaseHTTPRequestHandler):
             'success': True,
             'couple_id': couple_id,
             'message': 'Пара создана успешно! (Демо-режим)',
+            'demo_mode': True
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
+    def handle_create_pet(self, data):
+        """Создание питомца (демо-режим)"""
+        couple_id = data.get('couple_id')
+        pet_type = data.get('pet_type', 'cat')
+        pet_name = data.get('pet_name', 'Питомец')
+        
+        if not couple_id:
+            self.send_error(400, "couple_id required")
+            return
+        
+        # Демо-режим - создаем виртуального питомца
+        pet_id = int(f"{couple_id}001")
+        response = {
+            'success': True,
+            'pet_id': pet_id,
+            'pet': {
+                'id': pet_id,
+                'couple_id': couple_id,
+                'name': pet_name,
+                'type': pet_type,
+                'level': 1,
+                'experience': 0,
+                'hunger': 100,
+                'happiness': 100,
+                'energy': 100,
+                'created_at': datetime.now().isoformat()
+            },
+            'message': 'Питомец создан успешно! (Демо-режим)',
+            'demo_mode': True
+        }
+        
+        self.send_response(200)
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    
+    def handle_pet_action(self, data):
+        """Выполнение действия с питомцем (демо-режим)"""
+        pet_id = data.get('pet_id')
+        action = data.get('action', 'feed')
+        
+        if not pet_id:
+            self.send_error(400, "pet_id required")
+            return
+        
+        # Демо-режим - симулируем действие
+        response = {
+            'success': True,
+            'action': action,
+            'pet_id': pet_id,
+            'message': f'Действие "{action}" выполнено! (Демо-режим)',
             'demo_mode': True
         }
         
